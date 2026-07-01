@@ -1,0 +1,57 @@
+
+
+services:
+  # O banco de dados relacional que guardará usuários, transações e categorias
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # O banco de dados em memória que servirá de fila para o Sidekiq
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/var/lib/redis/data
+    ports:
+      - "6379:6379"
+
+  # A API em Ruby on Rails
+  web:
+    image: ruby:3.3
+    command: bash -c "rm -f tmp/pids/server.pid && bundle install && rails s -b '0.0.0.0'"
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://postgres:password@db:5432/finance_production
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+
+  # O processador de tarefas em segundo plano (Sidekiq)
+  sidekiq:
+    image: ruby:3.3
+    command: bundle exec sidekiq
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - DATABASE_URL=postgres://postgres:password@db:5432/finance_production
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:
