@@ -38,12 +38,6 @@ Esta é a API REST funcional de um SaaS Financeiro, desenvolvida com foco em seg
     docker compose exec web bundle exec rails db:migrate
     ```
 
-* **How to run the test suite**
-  * A aplicação conta com infraestrutura de testes automatizados para validar a integridade dos modelos e controladores. Para rodar a suíte de testes dentro do contêiner, execute:
-    ```powershell
-    docker compose exec web bundle exec rails test
-    ```
-
 * **Services (job queues, cache servers, search engines, etc.)**
   * **Redis:** Utilizado como servidor de cache de alta performance e broker de mensagens.
   * **Sidekiq:** Responsável pelo processamento assíncrono de background jobs e filas recorrentes da aplicação.
